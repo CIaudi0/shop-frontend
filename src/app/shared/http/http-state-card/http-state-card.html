@@ -1,0 +1,23 @@
+@switch (state?.status) {
+  @case ('loading') {
+    <section class="http-state-loading">
+      <mat-progress-spinner
+        mode="indeterminate"
+        aria-label="Caricamento dati"
+      ></mat-progress-spinner>
+    </section>
+  }
+  @case ('error') {
+    <mat-card class="http-state-error" aria-live="polite">
+      <mat-card-title>Errore</mat-card-title>
+      <mat-card-content>
+        <p>{{ state?.status }}</p>
+        <button mat-button (click)="onRetry()">Riprova</button>
+      </mat-card-content>
+    </mat-card>
+  }
+  @default {
+    <!-- stato success: mostriamo il contenuto del parent -->
+    <ng-content></ng-content>
+  }
+}

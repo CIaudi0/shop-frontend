@@ -1,0 +1,45 @@
+@if (product$ | async; as product) {
+  <mat-card class="product-detail-card">
+    <div class="custom-header">
+      <button mat-icon-button color="primary" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+
+      <mat-card-header class="centered-header">
+        <mat-card-title style="font-weight: bold; padding: 10px">{{
+          product.title
+        }}</mat-card-title>
+        <mat-card-subtitle>
+          @if (product.sale) {
+            <span class="price-original">{{ product.originalPrice | currency: 'EUR' }}</span>
+            <span class="price-sale">{{ product.price | currency: 'EUR' }}</span>
+          } @else {
+            {{ product.price | currency: 'EUR' }}
+          }
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <div class="spacer"></div>
+    </div>
+
+    <img mat-card-image class="centered-image" [src]="product.thumbnail" [alt]="product.title" />
+
+    <mat-card-content class="centered-content">
+      <p>{{ product.description }}</p>
+    </mat-card-content>
+
+    <mat-card-actions class="centered-actions">
+      <button mat-raised-button color="primary" class="edit-button" (click)="addToCart(product)">
+        <mat-icon style="margin: auto; font-size: x-large; width: auto">add_shopping_cart</mat-icon>
+      </button>
+      @if (auth.isVendor) {
+        <button mat-raised-button color="primary" class="edit-button" (click)="removeProduct(product)">
+          <mat-icon style="margin: auto; font-size: x-large; width: auto">delete</mat-icon>
+        </button>
+        <button mat-raised-button color="primary" class="edit-button" (click)="updateProduct(product)">
+          <mat-icon style="margin: auto; font-size: x-large; width: auto">edit</mat-icon>
+        </button>
+      }
+    </mat-card-actions>
+  </mat-card>
+}
