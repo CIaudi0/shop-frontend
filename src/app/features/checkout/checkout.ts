@@ -1,20 +1,19 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { map, take } from 'rxjs';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'; // Per lo spinner di caricamento
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { RouterLink } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 
 import { CartService } from '../../core/services/cart';
 import { OrderService } from '../../core/services/order';
 import { Order } from '../../core/models/order';
 import { AuthService } from '../../core/services/auth';
-import { RouterLink } from "@angular/router";
-import { MatIcon } from "@angular/material/icon";
 
 @Component({
   selector: 'app-checkout',
@@ -28,25 +27,40 @@ import { MatIcon } from "@angular/material/icon";
     MatCheckboxModule,
     MatProgressSpinnerModule,
     RouterLink,
-    MatIcon
-],
+    MatIconModule
+  ],
   templateUrl: './checkout.html'
 })
 export class CheckoutComponent implements OnInit {
   private fb = inject(FormBuilder);
-  
-  private cart = inject(CartService);
+
+  public cartService = inject(CartService);
   private orderService = inject(OrderService);
+  public auth = inject(AuthService);
 
   showSummary = false;
-  
   loading = false;
   orderSuccess = false;
   orderError = false;
 
-  readonly items$ = this.cart.list();
-  readonly total$ = this.items$.pipe(
-    map(items => items.reduce((sum, item) => sum + Number(item.price), 0))
+  public readonly groupedItems = computed(() => {
+    const items = this.cartService.items();
+    const grouped = new Map<string, any>();
+
+    items.forEach(item => {
+      const idStr = item.id.toString();
+      if (grouped.has(idStr)) {
+        grouped.get(idStr).quantity++;
+      } else {
+        grouped.set(idStr, { ...item, price: Number(item.price), quantity: 1 });
+      }
+    });
+
+    return Array.from(grouped.values());
+  });
+
+  public readonly totalPrice = computed(() =>
+    this.groupedItems().reduce((sum, item) => sum + item.price * item.quantity, 0)
   );
 
   readonly form = this.fb.group({
@@ -64,34 +78,45 @@ export class CheckoutComponent implements OnInit {
     privacy: [false, Validators.requiredTrue]
   });
 
-  readonly groupedItems$ = this.items$.pipe(
-    map(items => {
-      const grouped = new Map<string, any>();
-      
-      items.forEach(item => {
-        if (grouped.has(item.id)) {
-          grouped.get(item.id).quantity++;
-        } else {
-          grouped.set(item.id, { ...item, quantity: 1 });
-        }
-      });
-      
-      return Array.from(grouped.values());
-    })
-  );
-  
+  ngOnInit(): void {
+    if (this.auth.isLoggedIn()) {
+      const user = this.auth.currentUser();
+      if (user) {
+        this.form.get('customer')?.patchValue({
+          firstName: user.first_name || '',
+          lastName: user.last_name || '',
+          email: user.email || ''
+        });
+      }
+    }
+  }
+
   getControl(path: string) { return this.form.get(path); }
+
   hasError(path: string, errorCode: string): boolean {
     const control = this.getControl(path);
     return !!control && control.hasError(errorCode) && control.touched;
   }
+
   private focusFirstInvalid(): void {
     const firstInvalid = document.querySelector('form .ng-invalid[formControlName]') as HTMLElement | null;
     firstInvalid?.focus();
   }
 
   removeFromCart(product: any): void {
-    this.cart.remove(product);
+    this.cartService.remove(product);
+  }
+
+  increaseQuantity(item: any): void {
+    this.cartService.updateQuantity(item.id, item.quantity + 1);
+  }
+
+  decreaseQuantity(item: any): void {
+    if (item.quantity > 1) {
+      this.cartService.updateQuantity(item.id, item.quantity - 1);
+    } else {
+      this.cartService.remove(item);
+    }
   }
 
   onSubmit(): void {
@@ -105,56 +130,30 @@ export class CheckoutComponent implements OnInit {
     this.loading = true;
     this.orderSuccess = false;
     this.orderError = false;
-    
-    const value = this.form.getRawValue();
 
-    this.items$.pipe(take(1)).subscribe(items => {
-      const order: Order = {
-        customer: value.customer,
-        address: value.address,
-        items: items,
-        total: items.reduce((sum, it) => sum + Number(it.price), 0),
-        createdAt: new Date().toISOString()
-      };
+    const value = this.form.getRawValue() as any;
 
-      this.orderService.create(order).subscribe({
-        next: () => {
-          this.loading = false;
-          this.orderSuccess = true;
-          this.cart.clear();
-          this.form.reset();
-          this.showSummary = false;
-        },
-        error: (err) => {
-          console.error("Errore salvataggio ordine:", err);
-          this.loading = false;
-          this.orderError = true; 
-        }
-      });
-    });
-  }
+    const order: Order = {
+      customer: value.customer,
+      address: value.address,
+      items: this.cartService.items(),
+      total: this.totalPrice(),
+      createdAt: new Date().toISOString()
+    };
 
-  public auth = inject(AuthService);
-
-  ngOnInit(): void {
-    if (this.auth.isLoggedIn) {
-      const user = this.auth.getUser();
-      
-      if (user) {
-        this.form.get('customer')?.patchValue({
-          firstName: user.first_name || '',
-          lastName: user.last_name || '',
-          email: user.email || ''
-        });
+    this.orderService.create(order).subscribe({
+      next: () => {
+        this.loading = false;
+        this.orderSuccess = true;
+        this.cartService.clear();
+        this.form.reset();
+        this.showSummary = false;
+      },
+      error: (err) => {
+        console.error('Errore salvataggio ordine:', err);
+        this.loading = false;
+        this.orderError = true;
       }
-    }
-  }
-
-  updateCartQuantity(productId: number, event: any): void {
-    const newQuantity = Number(event.target.value);
-    
-    if (newQuantity > 0) {
-      this.cart.updateQuantity(productId, newQuantity);
-    }
+    });
   }
 }

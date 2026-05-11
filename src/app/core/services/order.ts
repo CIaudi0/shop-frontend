@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Order } from '../models/order';
 import { AuthService } from './auth';
 
 @Injectable({
@@ -12,19 +11,19 @@ export class OrderService {
   private auth = inject(AuthService);
   private apiUrl = 'http://localhost:3000/orders';
 
+  private get headers(): HttpHeaders {
+    return new HttpHeaders().set('Authorization', `Bearer ${this.auth.token()}`);
+  }
+
   create(order: any): Observable<any> {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${this.auth.token}`);
-    
-    return this.http.post(this.apiUrl, order, { headers });
+    return this.http.post(this.apiUrl, order, { headers: this.headers });
   }
 
   getOrders(): Observable<any[]> {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${this.auth.token}`);
-    return this.http.get<any[]>(this.apiUrl, { headers });
+    return this.http.get<any[]>(this.apiUrl, { headers: this.headers });
   }
   
   getOrderById(id: string | number): Observable<any> {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${this.auth.token}`);
-    return this.http.get<any>(`${this.apiUrl}/${id}`, { headers });
+    return this.http.get<any>(`${this.apiUrl}/${id}`, { headers: this.headers });
   }
 }

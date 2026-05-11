@@ -70,63 +70,74 @@
     >
       <h2 style="margin-top: 0; color: #333">Riepilogo carrello</h2>
 
-      @if ((items$ | async)?.length === 0) {
+      @if (groupedItems().length === 0) {
         <p style="color: #d32f2f; font-weight: bold">
           Il carrello è vuoto. Aggiungi prodotti prima di procedere.
         </p>
       } @else {
         <ul style="list-style: none; padding: 0; margin: 0 0 1rem 0">
-          @for (item of groupedItems$ | async; track item.id) {
+          @for (item of groupedItems(); track item.id) {
             <li
               style="
                 display: flex;
                 align-items: center;
-                padding: 8px 0;
+                padding: 10px 0;
                 border-bottom: 2px solid #eee;
+                gap: 12px;
               "
             >
-              <button
-                type="button"
+              <a
                 [routerLink]="['/products', item.id]"
-                mat-button
-                style="border-radius: 5px; color: black; text-align: left"
+                style="color: #333; text-decoration: none; font-weight: 500; flex: 1;"
               >
                 {{ item.title }}
-              </button>
+              </a>
 
-              <div style="margin-left: auto; display: flex; align-items: center; gap: 15px">
-                <input 
-                  type="number" 
-                  [value]="item.quantity" 
-                  (change)="updateCartQuantity(item.id, $event)"
-                  min="1"
-                  style="width: 60px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; font-size: 1rem;"
-                  aria-label="Quantità"
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <button
+                  mat-icon-button
+                  type="button"
+                  (click)="decreaseQuantity(item)"
                 >
+                  <mat-icon>remove</mat-icon>
+                </button>
 
-                <strong style="margin-right: 10px; width: 80px; text-align: right;">
-                  {{ item.price * item.quantity | currency: 'EUR' }}
-                </strong>
+                <span style="min-width: 28px; text-align: center; font-weight: 500;">
+                  {{ item.quantity }}
+                </span>
 
                 <button
-                  mat-stroked-button
+                  mat-icon-button
                   type="button"
-                  style="color: rgb(103, 9, 9); border-radius: 5px; padding: 0; min-width: 40px;"
-                  (click)="removeFromCart(item)"
+                  (click)="increaseQuantity(item)"
                 >
-                  <mat-icon style="margin:auto; font-size: x-large; width: auto;">delete_outline</mat-icon>
+                  <mat-icon>add</mat-icon>
                 </button>
               </div>
+
+              <strong style="width: 80px; text-align: right;">
+                {{ item.price * item.quantity | currency: 'EUR' }}
+              </strong>
+
+              <button
+                mat-icon-button
+                type="button"
+                style="color: rgb(103, 9, 9);"
+                (click)="removeFromCart(item)"
+              >
+                <mat-icon>delete_outline</mat-icon>
+              </button>
             </li>
           }
         </ul>
+
         <div style="text-align: right; font-size: 1.2rem; margin-top: 1rem">
-          Totale: <strong style="color: #3f51b5">{{ total$ | async | currency: 'EUR' }}</strong>
+          Totale: <strong style="color: #3f51b5">{{ totalPrice() | currency: 'EUR' }}</strong>
         </div>
       }
     </section>
 
-    @if (auth.isLoggedIn) {
+    @if (auth.isLoggedIn()) {
       <form class="checkout-form" [formGroup]="form" (ngSubmit)="onSubmit()">
         <section
           formGroupName="customer"
@@ -192,21 +203,20 @@
             padding-top: 1rem;
           "
         >
-          <mat-checkbox formControlName="privacy" color="primary"
-            >Accetto i termini di servizio e la privacy policy</mat-checkbox
-          >
+          <mat-checkbox formControlName="privacy" color="primary">
+            Accetto i termini di servizio e la privacy policy
+          </mat-checkbox>
           @if (hasError('privacy', 'required')) {
-            <mat-error style="font-size: 12px; margin-top: -15px"
-              >Devi accettare per procedere.</mat-error
-            >
+            <mat-error style="font-size: 12px; margin-top: -15px">
+              Devi accettare per procedere.
+            </mat-error>
           }
 
           <button
             mat-raised-button
             color="primary"
             type="submit"
-            size="large"
-            [disabled]="form.invalid || (items$ | async)?.length === 0 || loading"
+            [disabled]="form.invalid || groupedItems().length === 0 || loading"
             style="
               padding: 24px;
               font-size: 1.1rem;
@@ -238,14 +248,14 @@
       >
         <mat-icon style="font-size: 3rem; width: 3rem; height: 3rem; margin-bottom: 1rem;">lock</mat-icon>
         <h2 style="margin-top: 0;">Accedi per continuare l'ordine</h2>
-        
-        <button 
-          mat-raised-button 
-          color="primary" 
+
+        <button
+          mat-raised-button
+          color="primary"
           (click)="auth.login()"
           style="padding: 24px; font-size: 1.1rem; margin-top: 1rem;"
         >
-          <mat-icon>login</mat-icon> 
+          <mat-icon>login</mat-icon>
           Accedi o Registrati
         </button>
       </div>

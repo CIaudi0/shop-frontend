@@ -1,6 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
 import { Product } from '../models/product';
 import { AuthService } from './auth';
 
@@ -11,45 +10,50 @@ export class CartService {
   private apiUrl = 'http://localhost:3000/cart';
   private readonly STORAGE_KEY = 'shop_cart_data';
 
-  private itemsSubject = new BehaviorSubject<Product[]>([]);
+  private _items = signal<Product[]>([]);
+  public readonly items = this._items.asReadonly();
+
+  public readonly totalCount = computed(() => this._items().length);
+  public readonly totalPrice = computed(() => {
+    return this._items().reduce((total, product) => total + product.price, 0);
+  });
 
   constructor() {
     this.loadCart();
   }
 
   private get headers(): HttpHeaders {
-    return new HttpHeaders().set('Authorization', `Bearer ${this.auth.token}`);
+    const token = this.auth.token();
+    return new HttpHeaders().set('Authorization', `Bearer ${token}`);
   }
 
   loadCart(): void {
-    if (!this.auth.token) {
-      this.itemsSubject.next(this.loadFromStorage());
+    if (!this.auth.isLoggedIn()) {
+      this._items.set(this.loadFromStorage());
       return;
     }
 
     this.http.get<any[]>(this.apiUrl, { headers: this.headers }).subscribe({
-      next: (items) => {
+      next: (itemsResponse) => {
         const products: Product[] = [];
-        items.forEach(item => {
+        itemsResponse.forEach(item => {
           for (let i = 0; i < item.quantity; i++) {
             products.push(item.product);
           }
         });
-        this.itemsSubject.next(products);
+        this._items.set(products);
       },
-      error: () => this.itemsSubject.next([])
+      error: () => this._items.set([])
     });
   }
 
-  list(): Observable<Product[]> {
-    return this.itemsSubject.asObservable();
-  }
-
   add(product: Product): void {
-    if (!this.auth.token) {
-      const updated = [...this.itemsSubject.getValue(), product];
-      this.itemsSubject.next(updated);
-      this.saveToStorage(updated);
+    if (!this.auth.isLoggedIn()) {
+      this._items.update(currentItems => {
+        const updated = [...currentItems, product];
+        this.saveToStorage(updated);
+        return updated;
+      });
       return;
     }
 
@@ -59,14 +63,17 @@ export class CartService {
   }
 
   remove(product: Product): void {
-    if (!this.auth.token) {
-      const current = this.itemsSubject.getValue();
-      const index = current.findIndex(item => item.id === product.id);
-      if (index !== -1) {
-        const updated = [...current.slice(0, index), ...current.slice(index + 1)];
-        this.itemsSubject.next(updated);
-        this.saveToStorage(updated);
-      }
+    if (!this.auth.isLoggedIn()) {
+      this._items.update(currentItems => {
+        const index = currentItems.findIndex(p => p.id === product.id);
+        if (index > -1) {
+          const updated = [...currentItems];
+          updated.splice(index, 1);
+          this.saveToStorage(updated);
+          return updated;
+        }
+        return currentItems;
+      });
       return;
     }
 
@@ -76,13 +83,13 @@ export class CartService {
   }
 
   clear(): void {
-    this.itemsSubject.next([]);
+    this._items.set([]);
     sessionStorage.removeItem(this.STORAGE_KEY);
   }
 
   syncLocalCartToServer(): void {
     const localItems = this.loadFromStorage();
-    if (localItems.length === 0 || !this.auth.token) {
+    if (localItems.length === 0 || !this.auth.isLoggedIn()) {
       this.loadCart();
       return;
     }
@@ -102,18 +109,30 @@ export class CartService {
   }
 
   updateQuantity(productId: number, quantity: number): void {
-    if (!this.auth.token) {
-      return; 
+    if (!this.auth.isLoggedIn()) {
+      this._items.update(currentItems => {
+        const filtered = currentItems.filter(p => p.id !== productId);
+        const targetProduct = currentItems.find(p => p.id === productId);
+        
+        if (targetProduct) {
+          for (let i = 0; i < quantity; i++) {
+            filtered.push(targetProduct);
+          }
+        }
+        this.saveToStorage(filtered);
+        return filtered;
+      });
+      return;
     }
 
-    this.http.patch(`${this.apiUrl}/update/${productId}`, { quantity: quantity }, { headers: this.headers }).subscribe({
+    this.http.patch(`${this.apiUrl}/update/${productId}`, { quantity }, { headers: this.headers }).subscribe({
       next: () => this.loadCart()
     });
   }
 
   private loadFromStorage(): Product[] {
-    const saved = sessionStorage.getItem(this.STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
+    const data = sessionStorage.getItem(this.STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
   }
 
   private saveToStorage(items: Product[]): void {

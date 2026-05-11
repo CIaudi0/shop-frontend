@@ -12,21 +12,23 @@ export interface AdminUser {
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
+  private apiUrl = 'http://localhost:3000/admin';
   private http = inject(HttpClient);
   private auth = inject(AuthService);
 
+  private get headers(): HttpHeaders {
+    return new HttpHeaders().set('Authorization', `Bearer ${this.auth.token()}`);
+  }
+
   getUsers(): Observable<AdminUser[]> {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${this.auth.token}`);
-    return this.http.get<AdminUser[]>('http://localhost:3000/admin/users', { headers });
+    return this.http.get<AdminUser[]>(`${this.apiUrl}/users`, { headers: this.headers });
   }
 
   updateUserRole(userId: number, newRole: string): Observable<any> {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${this.auth.token}`);
-    return this.http.patch(`http://localhost:3000/admin/users/${userId}`, { role: newRole }, { headers });
+    return this.http.patch(`${this.apiUrl}/users/${userId}`, { role: newRole }, { headers: this.headers });
   }
 
   deleteUser(userId: number): Observable<any> {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${this.auth.token}`);
-    return this.http.delete(`http://localhost:3000/admin/users/${userId}`, { headers });
+    return this.http.delete(`${this.apiUrl}/users/${userId}`, { headers: this.headers });
   }
 }

@@ -1,28 +1,32 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { AuthService } from './auth';
+import { Product } from '../models/product';
 
 @Injectable({ providedIn: 'root' })
 export class VendorService {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
+  private apiUrl = 'http://localhost:3000';
 
-  getProduct(id: string) {
-    return this.http.get<any>(`http://localhost:3000/products/${id}`);
+  private get headers(): HttpHeaders {
+    return new HttpHeaders().set('Authorization', `Bearer ${this.auth.token()}`);
+  }
+
+  getProduct(id: string): Observable<Product> {
+    return this.http.get<Product>(`${this.apiUrl}/products/${id}`);
   }
   
-  createProduct(productData: any) {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${this.auth.token}`);
-    return this.http.post('http://localhost:3000/vendor/products', { product: productData }, { headers });
+  createProduct(productData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/vendor/products`, { product: productData }, { headers: this.headers });
   }
 
-  removeProduct(productId: number) {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${this.auth.token}`);
-    return this.http.delete(`http://localhost:3000/vendor/products/${productId}`, { headers });
+  removeProduct(productId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/vendor/products/${productId}`, { headers: this.headers });
   }
 
-  updateProduct(productId: number, productData: any) {
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${this.auth.token}`);
-    return this.http.patch(`http://localhost:3000/vendor/products/${productId}`, { product: productData }, { headers });
+  updateProduct(productId: number, productData: any): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/vendor/products/${productId}`, { product: productData }, { headers: this.headers });
   }
 }

@@ -2,35 +2,38 @@
   <form class="filters" (submit)="$event.preventDefault()">
     <mat-form-field appearance="outline">
       <mat-label>Cerca per titolo</mat-label>
-      <input
-        matInput
-        type="search"
-        name="title"
-        placeholder="Es. MacBook, Cuffie..."
-        [(ngModel)]="filters.title"
-        (ngModelChange)="applyFilters()"
+      <input 
+        matInput 
+        type="search" 
+        name="title" 
+        placeholder="Es. MacBook, Cuffie..." 
+        [ngModel]="searchTitle()"
+        (ngModelChange)="searchTitle.set($event)" 
       />
       <mat-icon matPrefix>search</mat-icon>
     </mat-form-field>
   </form>
 
-  <app-http-state-card [state]="httpState$ | async" (retry)="reload()">
+  @if (filteredProducts() === undefined) {
+    <div style="display: flex; justify-content: center; padding: 50px;">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  } @else {
     <div class="product-grid">
-      @for (product of filteredProducts; track product.id) {
+      @for (product of filteredProducts(); track product.id) {
         <div class="product-card">
-          <img [src]="product?.thumbnail" [alt]="product?.title" class="product-image" />
-
-          <h3>{{ product?.title }}</h3>
-          <p class="price">{{ product?.price }} €</p>
-          <p class="description">{{ product?.description | slice: 0 : 60 }}...</p>
+          <img 
+            [src]="product.thumbnail || 'https://placehold.co/400x400/eeeeee/999999?text=Immagine+non+disponibile'" 
+            (error)="$event.target.src='https://placehold.co/400x400/eeeeee/999999?text=Immagine+non+disponibile'" 
+            [alt]="product.title" 
+            class="product-image" 
+          />
+          <h3>{{ product.title }}</h3>
+          <p class="price">{{ product.price }} €</p>
+          <p class="description">{{ product.description | slice: 0 : 60 }}...</p>
 
           <div class="card-actions">
-            <button
-              type="button"
-              [routerLink]="['/products', product.id]"
-              mat-stroked-button
-              color="accent"
-            >
+            <button type="button" [routerLink]="['/products', product.id]" mat-stroked-button color="accent">
               Dettagli
             </button>
             <button mat-raised-button color="primary" style="flex: 1;" (click)="addToCart(product)">
@@ -42,5 +45,5 @@
         <p class="empty-message">Nessun prodotto corrisponde alla tua ricerca.</p>
       }
     </div>
-  </app-http-state-card>
+  }
 </div>

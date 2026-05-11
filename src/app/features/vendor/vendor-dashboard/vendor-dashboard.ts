@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router'; // <-- AGGIUNTI
+import { ActivatedRoute, Router } from '@angular/router'; 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,52 +16,7 @@ import { VendorService } from '../../../core/services/vendor';
     CommonModule, ReactiveFormsModule, MatFormFieldModule,
     MatInputModule, MatButtonModule, MatCardModule, MatSnackBarModule
   ],
-  template: `
-    <div style="max-width: 800px; margin: 3rem auto; padding: 0 20px;">
-      <mat-card class="mat-elevation-z4" style="padding: 20px;">
-        <mat-card-header style="margin-bottom: 20px; display: flex; justify-content: center;">
-          <mat-card-title style="font-size: 1.8rem;">
-            {{ isEditMode ? 'Modifica Prodotto' : 'Aggiungi Nuovo Prodotto' }}
-          </mat-card-title>
-        </mat-card-header>
-
-        <mat-card-content>
-          <form [formGroup]="productForm" (ngSubmit)="onSubmit()" style="display: flex; flex-direction: column; gap: 16px;">
-            
-            <mat-form-field appearance="outline">
-              <mat-label>Titolo del Prodotto</mat-label>
-              <input matInput formControlName="title" placeholder="Es. T-Shirt Bianca in Cotone">
-            </mat-form-field>
-
-            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-              <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;">
-                <mat-label>Prezzo (€)</mat-label>
-                <input matInput type="number" formControlName="price">
-              </mat-form-field>
-            </div>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Link Immagine (URL)</mat-label>
-              <input matInput formControlName="thumbnail">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Descrizione Dettagliata</mat-label>
-              <textarea matInput formControlName="description" rows="5"></textarea>
-            </mat-form-field>
-
-            <div style="text-align: right; margin: auto; margin-top: 10px; display: flex; justify-content: flex; gap: 10px;">
-              <button mat-button type="button" (click)="goBack()">Annulla</button>
-              
-              <button mat-raised-button color="primary" type="submit" [disabled]="productForm.invalid" style="padding: 8px 32px; font-size: 1.1rem;">
-                {{ isEditMode ? 'Salva' : 'Pubblica' }}
-              </button>
-            </div>
-          </form>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  `
+  templateUrl: './vendor-dashboard.html'
 })
 export class VendorDashboardComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -75,8 +30,8 @@ export class VendorDashboardComponent implements OnInit {
 
   productForm = this.fb.group({
     title: ['', Validators.required],
-    price: ['', [Validators.required, Validators.min(0.01)]],
-    thumbnail: ['', Validators.required],
+    price: [null as number | null, [Validators.required, Validators.min(0.01)]],
+    image: ['', Validators.required],
     description: ['', Validators.required]
   });
 

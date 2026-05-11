@@ -3,13 +3,13 @@
     <mat-icon>home</mat-icon>
   </button>
 
-  @if (auth.isAdmin) {
+  @if (auth.isAdmin()) {
     <button mat-icon-button aria-label="Dashboard" (click)="goToAdminDashboard()">
       <mat-icon>dashboard</mat-icon>
     </button>
   }
 
-  @if (auth.isVendor) {
+  @if (auth.isVendor()) {
     <button mat-icon-button aria-label="Dashboard" (click)="goToVendorDashboard()">
       <mat-icon>library_add</mat-icon>
     </button>
@@ -23,15 +23,15 @@
 
   <button mat-icon-button (click)="goToCheckout()">
     <mat-icon
-      [matBadge]="cartCount$ | async"
+      [matBadge]="cartService.totalCount()"
       matBadgeColor="warn"
-      [matBadgeHidden]="(cartCount$ | async) === 0"
+      [matBadgeHidden]="cartService.totalCount() === 0"
     >
       shopping_cart
     </mat-icon>
   </button>
 
-  @if (!auth.isLoggedIn) {
+  @if (!auth.isLoggedIn()) {
     <button mat-button (click)="auth.login()"><mat-icon>login</mat-icon> Login</button>
   } @else {
     <button mat-icon-button [matMenuTriggerFor]="userMenu">
@@ -50,6 +50,4 @@
       </button>
     </mat-menu>
   }
-
-  
 </mat-toolbar>

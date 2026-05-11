@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, NgZone } from '@angular/core'; // <-- Aggiunto NgZone
+import { Component, inject, OnInit, signal, NgZone } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -12,7 +12,7 @@ import { OrderService } from '../../core/services/order';
 })
 export class OrdersComponent implements OnInit {
   private orderService = inject(OrderService);
-  private zone = inject(NgZone); // <-- Iniettiamo la Zone
+  private zone = inject(NgZone); 
 
   orders = signal<any[]>([]);
   loading = signal<boolean>(true);
@@ -21,7 +21,6 @@ export class OrdersComponent implements OnInit {
     this.orderService.getOrders().subscribe({
       next: (data) => {
         console.log("Dati ricevuti da Rails:", data);
-        // Riportiamo l'aggiornamento DENTRO il radar di Angular
         this.zone.run(() => {
           this.orders.set(data);
           this.loading.set(false);

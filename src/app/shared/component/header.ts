@@ -6,7 +6,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
 import { MatBadgeModule } from '@angular/material/badge';
 import { CartService } from '../../core/services/cart';
-import { map } from 'rxjs';
 import { AuthService } from '../../core/services/auth';
 import { MatMenuModule } from '@angular/material/menu';
 
@@ -22,12 +21,9 @@ export class HeaderComponent {
   @Input() showIcon: boolean = true;
 
   private router = inject(Router);
-  private cartService = inject(CartService);
+  
+  public cartService = inject(CartService); 
   public auth = inject(AuthService);
-
-  cartCount$ = this.cartService.list().pipe(
-    map(items => items.length)
-  );
 
   goToCheckout() {
     this.router.navigate(['/checkout']);
@@ -46,7 +42,7 @@ export class HeaderComponent {
   }
 
   toggleLogin(): void {
-    this.auth.isLoggedIn ? this.auth.logout() : this.auth.login();
+    this.auth.isLoggedIn() ? this.auth.logout() : this.auth.login();
   }
 
   goToOrders() {
