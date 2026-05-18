@@ -1,11 +1,9 @@
 import { Routes } from '@angular/router';
 import { CheckoutComponent } from './features/checkout/checkout';
 import { ProductDetailPage } from './features/product-detail-page/product-detail-page';
-import { checkoutGuard } from './core/guard/checkout-guard';
 import { adminGuard } from './core/guard/admin-guard';
 import { VendorDashboardComponent } from './features/vendor/vendor-dashboard/vendor-dashboard';
 import { vendorGuard } from './core/guard/vendor-guard';
-import { OrdersComponent } from './features/orders/orders';
 import { authGuard } from './core/guard/auth-guard';
 
 export const routes: Routes = [

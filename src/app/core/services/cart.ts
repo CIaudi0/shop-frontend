@@ -1,5 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Product } from '../models/product';
 import { AuthService } from './auth';
 
@@ -7,7 +7,6 @@ import { AuthService } from './auth';
 export class CartService {
   private http = inject(HttpClient);
   private auth = inject(AuthService);
-  private apiUrl = 'http://localhost:3000/cart';
   private readonly STORAGE_KEY = 'shop_cart_data';
 
   private _items = signal<Product[]>([]);
@@ -22,18 +21,13 @@ export class CartService {
     this.loadCart();
   }
 
-  private get headers(): HttpHeaders {
-    const token = this.auth.token();
-    return new HttpHeaders().set('Authorization', `Bearer ${token}`);
-  }
-
   loadCart(): void {
     if (!this.auth.isLoggedIn()) {
       this._items.set(this.loadFromStorage());
       return;
     }
 
-    this.http.get<any[]>(this.apiUrl, { headers: this.headers }).subscribe({
+    this.http.get<any[]>('/cart').subscribe({
       next: (itemsResponse) => {
         const products: Product[] = [];
         itemsResponse.forEach(item => {
@@ -57,7 +51,7 @@ export class CartService {
       return;
     }
 
-    this.http.post(`${this.apiUrl}/add/${product.id}`, {}, { headers: this.headers }).subscribe({
+    this.http.post(`/cart/add/${product.id}`, {}).subscribe({
       next: () => this.loadCart()
     });
   }
@@ -77,7 +71,7 @@ export class CartService {
       return;
     }
 
-    this.http.delete(`${this.apiUrl}/remove/${product.id}`, { headers: this.headers }).subscribe({
+    this.http.delete(`/cart/remove/${product.id}`).subscribe({
       next: () => this.loadCart()
     });
   }
@@ -96,7 +90,7 @@ export class CartService {
 
     let completedRequests = 0;
     localItems.forEach((item) => {
-      this.http.post(`${this.apiUrl}/add/${item.id}`, {}, { headers: this.headers }).subscribe({
+      this.http.post(`/cart/add/${item.id}`, {}).subscribe({
         next: () => {
           completedRequests++;
           if (completedRequests === localItems.length) {
@@ -125,7 +119,7 @@ export class CartService {
       return;
     }
 
-    this.http.patch(`${this.apiUrl}/update/${productId}`, { quantity }, { headers: this.headers }).subscribe({
+    this.http.patch(`/cart/update/${productId}`, { quantity }).subscribe({
       next: () => this.loadCart()
     });
   }

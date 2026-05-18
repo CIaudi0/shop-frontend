@@ -18,7 +18,7 @@ export class AuthService {
       const decodedJson = atob(payloadBase64);
       return JSON.parse(decodedJson);
     } catch (error) {
-      console.error('Errore nella lettura del token', error);
+      console.error(error);
       return null;
     }
   });
