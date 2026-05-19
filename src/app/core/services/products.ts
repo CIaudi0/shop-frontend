@@ -17,8 +17,4 @@ export class ProductService {
   getById(id: string): Observable<Product> {
     return this.http.get<Product>(`/products/${id}`);
   }
-
-  removeById(id: number): Observable<void> {
-    return this.http.delete<void>(`/vendor/products/${id}`);
-  }
 }

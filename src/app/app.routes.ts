@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { CheckoutComponent } from './features/checkout/checkout';
 import { ProductDetailPage } from './features/product-detail-page/product-detail-page';
 import { adminGuard } from './core/guard/admin-guard';
 import { VendorDashboardComponent } from './features/vendor/vendor-dashboard/vendor-dashboard';

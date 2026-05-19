@@ -12,6 +12,8 @@ export class CartService {
   private _items = signal<Product[]>([]);
   public readonly items = this._items.asReadonly();
 
+  private loadCartRequestId = 0;
+
   public readonly totalCount = computed(() => this._items().length);
   public readonly totalPrice = computed(() => {
     return this._items().reduce((total, product) => total + product.price, 0);
@@ -27,8 +29,10 @@ export class CartService {
       return;
     }
 
+    const requestId = ++this.loadCartRequestId;
     this.http.get<any[]>('/cart').subscribe({
       next: (itemsResponse) => {
+        if (requestId !== this.loadCartRequestId) return;
         const products: Product[] = [];
         itemsResponse.forEach(item => {
           for (let i = 0; i < item.quantity; i++) {
@@ -37,7 +41,10 @@ export class CartService {
         });
         this._items.set(products);
       },
-      error: () => this._items.set([])
+      error: () => {
+        if (requestId !== this.loadCartRequestId) return;
+        this._items.set([]);
+      }
     });
   }
 
@@ -105,16 +112,23 @@ export class CartService {
   updateQuantity(productId: number, quantity: number): void {
     if (!this.auth.isLoggedIn()) {
       this._items.update(currentItems => {
-        const filtered = currentItems.filter(p => p.id !== productId);
         const targetProduct = currentItems.find(p => p.id === productId);
-        
-        if (targetProduct) {
-          for (let i = 0; i < quantity; i++) {
-            filtered.push(targetProduct);
+        if (!targetProduct) return currentItems;
+
+        const result: Product[] = [];
+        let inserted = false;
+        for (const p of currentItems) {
+          if (p.id === productId) {
+            if (!inserted) {
+              for (let i = 0; i < quantity; i++) result.push(targetProduct);
+              inserted = true;
+            }
+          } else {
+            result.push(p);
           }
         }
-        this.saveToStorage(filtered);
-        return filtered;
+        this.saveToStorage(result);
+        return result;
       });
       return;
     }

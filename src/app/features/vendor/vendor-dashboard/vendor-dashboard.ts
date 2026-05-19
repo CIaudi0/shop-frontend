@@ -31,7 +31,7 @@ export class VendorDashboardComponent implements OnInit {
   productForm = this.fb.group({
     title: ['', Validators.required],
     price: [null as number | null, [Validators.required, Validators.min(0.01)]],
-    image: ['', Validators.required],
+    thumbnail: ['', Validators.required],
     description: ['', Validators.required]
   });
 

@@ -3,13 +3,13 @@ import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { switchMap, map, Observable } from 'rxjs';
+import { switchMap, map } from 'rxjs';
 import { ProductService } from '../../core/services/products';
+import { VendorService } from '../../core/services/vendor';
 import { CartService } from '../../core/services/cart';
 import { MatIcon } from "@angular/material/icon";
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../core/services/auth';
-import { HttpClient } from '@angular/common/http';
 import { ConfirmDialogComponent } from '../../shared/component/confirm';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -22,19 +22,18 @@ import { MatDialog } from '@angular/material/dialog';
 })
 export class ProductDetailPage {
   private route = inject(ActivatedRoute);
-  private svc = inject(ProductService);
+  private productService = inject(ProductService);
+  private vendorService = inject(VendorService);
   private location = inject(Location);
   private cartService = inject(CartService);
   private snackBar = inject(MatSnackBar);
   protected auth = inject(AuthService);
   private router = inject(Router);
-  protected productService = inject(ProductService);
-  private http = inject(HttpClient);
   private dialog = inject(MatDialog);
 
   readonly product$ = this.route.paramMap.pipe(
     map((params) => params.get('id') as string),
-    switchMap((id) => this.svc.getById(id)),
+    switchMap((id) => this.productService.getById(id)),
   );
 
   goBack(): void {
@@ -55,7 +54,7 @@ export class ProductDetailPage {
 
       if (confermato) {
 
-        this.productService.removeById(product.id).subscribe({
+        this.vendorService.removeProduct(product.id).subscribe({
           next: () => {
             this.snackBar.open('Prodotto rimosso con successo!', 'Chiudi', { duration: 2000 });
             this.router.navigate(['/products']);
