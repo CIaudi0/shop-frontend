@@ -1,4 +1,5 @@
 import { inject, Injectable, Injector, signal, computed } from '@angular/core';
+import { environment } from '../../../environments';
 import { CartService } from './cart';
 
 @Injectable({ providedIn: 'root' })
@@ -34,7 +35,7 @@ export class AuthService {
   public readonly token = this._token.asReadonly();
 
   login(): void {
-    window.location.href = 'http://localhost:3000/auth/google_oauth2';
+    window.location.href = `${environment.apiUrl}/auth/google_oauth2`;
   }
 
   logout(): void {

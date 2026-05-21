@@ -59,7 +59,8 @@ export class CartService {
     }
 
     this.http.post(`/cart/add/${product.id}`, {}).subscribe({
-      next: () => this.loadCart()
+      next: () => this.loadCart(),
+      error: () => this.loadCart()
     });
   }
 
@@ -79,7 +80,8 @@ export class CartService {
     }
 
     this.http.delete(`/cart/remove/${product.id}`).subscribe({
-      next: () => this.loadCart()
+      next: () => this.loadCart(),
+      error: () => this.loadCart()
     });
   }
 
@@ -134,7 +136,8 @@ export class CartService {
     }
 
     this.http.patch(`/cart/update/${productId}`, { quantity }).subscribe({
-      next: () => this.loadCart()
+      next: () => this.loadCart(),
+      error: () => this.loadCart()
     });
   }
 
