@@ -70,13 +70,13 @@
     >
       <h2 style="margin-top: 0; color: #333">Riepilogo carrello</h2>
 
-      @if (groupedItems().length === 0) {
+      @if (cartService.items().length === 0) {
         <p style="color: #d32f2f; font-weight: bold">
           Il carrello è vuoto. Aggiungi prodotti prima di procedere.
         </p>
       } @else {
         <ul style="list-style: none; padding: 0; margin: 0 0 1rem 0">
-          @for (item of groupedItems(); track item.id) {
+          @for (item of cartService.items(); track item.product.id) {
             <li
               style="
                 display: flex;
@@ -87,10 +87,10 @@
               "
             >
               <a
-                [routerLink]="['/products', item.id]"
+                [routerLink]="['/products', item.product.id]"
                 style="color: #333; text-decoration: none; font-weight: 500; flex: 1;"
               >
-                {{ item.title }}
+                {{ item.product.title }}
               </a>
 
               <div style="display: flex; align-items: center; gap: 6px;">
@@ -116,7 +116,7 @@
               </div>
 
               <strong style="width: 80px; text-align: right;">
-                {{ item.price * item.quantity | currency: 'EUR' }}
+                {{ item.product.price * item.quantity | currency: 'EUR' }}
               </strong>
 
               <button
@@ -132,7 +132,7 @@
         </ul>
 
         <div style="text-align: right; font-size: 1.2rem; margin-top: 1rem">
-          Totale: <strong style="color: #3f51b5">{{ totalPrice() | currency: 'EUR' }}</strong>
+          Totale: <strong style="color: #3f51b5">{{ cartService.totalPrice() | currency: 'EUR' }}</strong>
         </div>
       }
     </section>
@@ -216,7 +216,7 @@
             mat-raised-button
             color="primary"
             type="submit"
-            [disabled]="form.invalid || groupedItems().length === 0 || loading"
+            [disabled]="form.invalid || cartService.items().length === 0 || loading"
             style="
               padding: 24px;
               font-size: 1.1rem;

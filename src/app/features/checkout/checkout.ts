@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, computed } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -43,25 +43,6 @@ export class CheckoutComponent implements OnInit {
   orderSuccess = false;
   orderError = false;
 
-  public readonly groupedItems = computed(() => {
-    const items = this.cartService.items();
-    const grouped = new Map<string, any>();
-
-    items.forEach(item => {
-      const idStr = item.id.toString();
-      if (grouped.has(idStr)) {
-        grouped.get(idStr).quantity++;
-      } else {
-        grouped.set(idStr, { ...item, price: Number(item.price), quantity: 1 });
-      }
-    });
-
-    return Array.from(grouped.values());
-  });
-
-  public readonly totalPrice = computed(() =>
-    this.groupedItems().reduce((sum, item) => sum + item.price * item.quantity, 0)
-  );
 
   readonly form = this.fb.group({
     customer: this.fb.group({
@@ -103,19 +84,19 @@ export class CheckoutComponent implements OnInit {
     firstInvalid?.focus();
   }
 
-  removeFromCart(product: any): void {
-    this.cartService.remove(product);
+  removeFromCart(item: { product: any; quantity: number }): void {
+    this.cartService.remove(item.product);
   }
 
-  increaseQuantity(item: any): void {
-    this.cartService.updateQuantity(item.id, item.quantity + 1);
+  increaseQuantity(item: { product: any; quantity: number }): void {
+    this.cartService.updateQuantity(item.product.id, item.quantity + 1);
   }
 
-  decreaseQuantity(item: any): void {
+  decreaseQuantity(item: { product: any; quantity: number }): void {
     if (item.quantity > 1) {
-      this.cartService.updateQuantity(item.id, item.quantity - 1);
+      this.cartService.updateQuantity(item.product.id, item.quantity - 1);
     } else {
-      this.cartService.remove(item);
+      this.cartService.remove(item.product);
     }
   }
 
@@ -137,7 +118,7 @@ export class CheckoutComponent implements OnInit {
       customer: value.customer,
       address: value.address,
       items: this.cartService.items(),
-      total: this.totalPrice(),
+      total: this.cartService.totalPrice(),
       createdAt: new Date().toISOString()
     };
 
