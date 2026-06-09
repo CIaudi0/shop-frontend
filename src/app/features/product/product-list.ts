@@ -29,14 +29,14 @@ import { HttpStateCard } from '../../shared/http/http-state-card/http-state-card
 })
 export class ProductListComponent {
   private productService = inject(ProductService);
-  private cartService    = inject(CartService);
-  private snackBar       = inject(MatSnackBar);
-  private destroyRef     = inject(DestroyRef);
+  private cartService = inject(CartService);
+  private snackBar = inject(MatSnackBar);
+  private destroyRef = inject(DestroyRef);
 
   public searchTitle = signal('');
   public currentPage = signal(1);
-  public state       = signal<HttpState<Product>>({ status: 'loading' });
-  public meta        = signal<ProductsMeta | null>(null);
+  public state = signal<HttpState<Product>>({ status: 'loading' });
+  public meta = signal<ProductsMeta | null>(null);
 
   // Computed signal type-safe: evita di accedere a state().data direttamente nel template
   public products = computed<Product[]>(() => {

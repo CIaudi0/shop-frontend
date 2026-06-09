@@ -21,4 +21,4 @@ import { MatDialogModule } from '@angular/material/dialog';
     </mat-dialog-actions>
   `
 })
-export class ConfirmDialogComponent {}
+export class ConfirmDialogComponent { }

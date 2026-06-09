@@ -3,21 +3,21 @@
 
   <app-http-state-card [state]="state()" (retry)="load()">
     @if (orders().length === 0) {
-      <p>Non hai ancora effettuato nessun ordine.</p>
+    <p>Non hai ancora effettuato nessun ordine.</p>
     }
 
     @for (order of orders(); track order.id) {
-      <mat-card style="margin-bottom: 15px;">
-        <mat-card-header>
-          <mat-card-title>Ordine #{{ order.id }}</mat-card-title>
-          <mat-card-subtitle>Effettuato il: {{ order.created_at | date:'dd/MM/yyyy HH:mm' }}</mat-card-subtitle>
-        </mat-card-header>
+    <mat-card style="margin-bottom: 15px;">
+      <mat-card-header>
+        <mat-card-title>Ordine #{{ order.id }}</mat-card-title>
+        <mat-card-subtitle>Effettuato il: {{ order.created_at | date:'dd/MM/yyyy HH:mm' }}</mat-card-subtitle>
+      </mat-card-header>
 
-        <mat-card-content style="margin-top: 10px;">
-          <p><strong>Stato:</strong> <span style="text-transform: capitalize;">{{ order.status }}</span></p>
-          <p><strong>Totale:</strong> {{ order.total | currency:'EUR':'symbol':'1.2-2' }}</p>
-        </mat-card-content>
-      </mat-card>
+      <mat-card-content style="margin-top: 10px;">
+        <p><strong>Stato:</strong> <span style="text-transform: capitalize;">{{ order.status }}</span></p>
+        <p><strong>Totale:</strong> {{ order.total | currency:'EUR':'symbol':'1.2-2' }}</p>
+      </mat-card-content>
+    </mat-card>
     }
   </app-http-state-card>
 </div>

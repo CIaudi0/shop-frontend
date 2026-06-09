@@ -19,20 +19,20 @@ import { VendorService } from '../../../core/services/vendor';
   templateUrl: './vendor-dashboard.html'
 })
 export class VendorDashboardComponent implements OnInit {
-  private fb            = inject(FormBuilder);
+  private fb = inject(FormBuilder);
   private vendorService = inject(VendorService);
-  private snackBar      = inject(MatSnackBar);
-  private route         = inject(ActivatedRoute);
-  private location      = inject(Location);
+  private snackBar = inject(MatSnackBar);
+  private route = inject(ActivatedRoute);
+  private location = inject(Location);
 
   isEditMode = false;
   productId: string | null = null;
 
   productForm = this.fb.group({
-    title:       ['', Validators.required],
-    price:       [null as number | null, [Validators.required, Validators.min(0.01)]],
-    stock:       [0, [Validators.required, Validators.min(0)]],
-    thumbnail:   ['', Validators.required],
+    title: ['', Validators.required],
+    price: [null as number | null, [Validators.required, Validators.min(0.01)]],
+    stock: [0, [Validators.required, Validators.min(0)]],
+    thumbnail: ['', Validators.required],
     description: ['', Validators.required]
   });
 

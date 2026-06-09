@@ -4,15 +4,15 @@
   </button>
 
   @if (auth.isAdmin()) {
-    <button mat-icon-button aria-label="Dashboard" (click)="goToAdminDashboard()">
-      <mat-icon>dashboard</mat-icon>
-    </button>
+  <button mat-icon-button aria-label="Dashboard" (click)="goToAdminDashboard()">
+    <mat-icon>dashboard</mat-icon>
+  </button>
   }
 
   @if (auth.isVendor()) {
-    <button mat-icon-button aria-label="Dashboard" (click)="goToVendorDashboard()">
-      <mat-icon>library_add</mat-icon>
-    </button>
+  <button mat-icon-button aria-label="Dashboard" (click)="goToVendorDashboard()">
+    <mat-icon>library_add</mat-icon>
+  </button>
   }
 
   <span class="spacer"></span>
@@ -22,32 +22,29 @@
   <span class="spacer"></span>
 
   <button mat-icon-button (click)="goToCheckout()">
-    <mat-icon
-      [matBadge]="cartService.totalCount()"
-      matBadgeColor="warn"
-      [matBadgeHidden]="cartService.totalCount() === 0"
-    >
+    <mat-icon [matBadge]="cartService.totalCount()" matBadgeColor="warn"
+      [matBadgeHidden]="cartService.totalCount() === 0">
       shopping_cart
     </mat-icon>
   </button>
 
   @if (!auth.isLoggedIn()) {
-    <button mat-button (click)="auth.login()"><mat-icon>login</mat-icon> Login</button>
+  <button mat-button (click)="auth.login()"><mat-icon>login</mat-icon> Login</button>
   } @else {
-    <button mat-icon-button [matMenuTriggerFor]="userMenu">
-      <mat-icon>account_circle</mat-icon>
+  <button mat-icon-button [matMenuTriggerFor]="userMenu">
+    <mat-icon>account_circle</mat-icon>
+  </button>
+
+  <mat-menu #userMenu="matMenu">
+    <button mat-menu-item (click)="goToOrders()">
+      <mat-icon>receipt_long</mat-icon>
+      <span>I Miei Ordini</span>
     </button>
 
-    <mat-menu #userMenu="matMenu">
-      <button mat-menu-item (click)="goToOrders()">
-        <mat-icon>receipt_long</mat-icon>
-        <span>I Miei Ordini</span>
-      </button>
-
-      <button mat-menu-item (click)="auth.logout()">
-        <mat-icon>logout</mat-icon>
-        <span>Logout</span>
-      </button>
-    </mat-menu>
+    <button mat-menu-item (click)="auth.logout()">
+      <mat-icon>logout</mat-icon>
+      <span>Logout</span>
+    </button>
+  </mat-menu>
   }
 </mat-toolbar>

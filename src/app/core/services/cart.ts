@@ -11,9 +11,9 @@ export interface CartItem {
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
-  private http      = inject(HttpClient);
-  private auth      = inject(AuthService);
-  private snackBar  = inject(MatSnackBar);
+  private http = inject(HttpClient);
+  private auth = inject(AuthService);
+  private snackBar = inject(MatSnackBar);
   private readonly STORAGE_KEY = 'shop_cart_data';
 
   private _items = signal<CartItem[]>([]);
@@ -42,7 +42,7 @@ export class CartService {
     const requestId = ++this.loadCartRequestId;
     this.http.get<CartItem[]>('/cart').subscribe({
       next: (items) => {
-        if (requestId !== this.loadCartRequestId) return; // risposta stale, scarta
+        if (requestId !== this.loadCartRequestId) return; 
         this._items.set(items);
       },
       error: () => {
@@ -141,7 +141,7 @@ export class CartService {
 
     const payload = localItems.map(item => ({
       product_id: item.product.id,
-      quantity:   item.quantity
+      quantity: item.quantity
     }));
 
     this.http.post('/cart/sync', { items: payload }).subscribe({

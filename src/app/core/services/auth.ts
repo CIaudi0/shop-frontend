@@ -7,12 +7,12 @@ import { CartService } from './cart';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private injector = inject(Injector);
-  private http     = inject(HttpClient);
+  private http = inject(HttpClient);
 
   private _token = signal<string | null>(null);
 
-  public readonly isLoggedIn  = computed(() => !!this._token());
-  public readonly token       = this._token.asReadonly();
+  public readonly isLoggedIn = computed(() => !!this._token());
+  public readonly token = this._token.asReadonly();
 
   public readonly currentUser = computed(() => {
     const t = this._token();
@@ -25,10 +25,10 @@ export class AuthService {
   });
 
   public readonly userRole = computed(() => this.currentUser()?.role ?? 'user');
-  public readonly isAdmin  = computed(() => this.userRole() === 'admin');
+  public readonly isAdmin = computed(() => this.userRole() === 'admin');
   public readonly isVendor = computed(() => this.userRole() === 'vendor' || this.userRole() === 'admin');
 
-    tryRefresh(): Observable<boolean> {
+  tryRefresh(): Observable<boolean> {
     return this.http
       .post<{ token: string }>('/auth/refresh', {}, { withCredentials: true })
       .pipe(

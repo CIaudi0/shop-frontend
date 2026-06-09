@@ -14,7 +14,7 @@ import { HttpStateCard } from '../../shared/http/http-state-card/http-state-card
 export class OrdersComponent {
   private orderService = inject(OrderService);
 
-  public state  = signal<HttpState<any>>({ status: 'loading' });
+  public state = signal<HttpState<any>>({ status: 'loading' });
   public orders = computed<any[]>(() => {
     const s = this.state();
     return s.status === 'success' ? s.data : [];
@@ -28,7 +28,7 @@ export class OrdersComponent {
     this.state.set({ status: 'loading' });
     this.orderService.getOrders().subscribe({
       next: (data) => this.state.set({ status: 'success', data }),
-      error: ()     => this.state.set({ status: 'error', message: 'Errore nel caricamento degli ordini.' })
+      error: () => this.state.set({ status: 'error', message: 'Errore nel caricamento degli ordini.' })
     });
   }
 }

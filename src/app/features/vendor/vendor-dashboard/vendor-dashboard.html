@@ -24,7 +24,7 @@
             <mat-label>Quantità in stock</mat-label>
             <input matInput type="number" formControlName="stock" min="0" step="1">
             @if (productForm.get('stock')?.hasError('min')) {
-              <mat-error>Lo stock non può essere negativo.</mat-error>
+            <mat-error>Lo stock non può essere negativo.</mat-error>
             }
           </mat-form-field>
         </div>
@@ -41,7 +41,8 @@
 
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
           <button mat-button type="button" (click)="goBack()">Annulla</button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="productForm.invalid" style="padding: 8px 32px; font-size: 1.1rem;">
+          <button mat-raised-button color="primary" type="submit" [disabled]="productForm.invalid"
+            style="padding: 8px 32px; font-size: 1.1rem;">
             {{ isEditMode ? 'Salva' : 'Pubblica' }}
           </button>
         </div>

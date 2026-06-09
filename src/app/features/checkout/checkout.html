@@ -1,240 +1,198 @@
-<div
-  style="
+<div style="
     max-width: 1000px;
     margin: 2rem auto;
     padding: 2rem 5rem;
     background: white;
     border-radius: 13px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  "
->
+  ">
   <h1 style="margin-bottom: 2rem">Checkout</h1>
 
   @if (orderSuccess) {
-    <div
-      style="
+  <div style="
         background-color: #e8f5e9;
         color: #2e7d32;
         padding: 2rem;
         border-radius: 8px;
         text-align: center;
         margin-bottom: 2rem;
-      "
-    >
-      <h2>Ordine completato con successo!</h2>
-      <p>Grazie per il tuo acquisto. Riceverai un'email di conferma a breve.</p>
-    </div>
+      ">
+    <h2>Ordine completato con successo!</h2>
+    <p>Grazie per il tuo acquisto. Riceverai un'email di conferma a breve.</p>
+  </div>
   }
 
   @if (orderError) {
-    <div
-      style="
+  <div style="
         background-color: #ffebee;
         color: #c62828;
         padding: 1rem;
         border-radius: 4px;
         margin-bottom: 2rem;
         border-left: 4px solid #c62828;
-      "
-    >
-      <p style="margin: 0; font-weight: bold">{{ orderErrorMessage }}</p>
-    </div>
+      ">
+    <p style="margin: 0; font-weight: bold">{{ orderErrorMessage }}</p>
+  </div>
   }
 
   @if (!orderSuccess) {
-    @if (showSummary && form.invalid) {
-      <div
-        class="error-summary"
-        role="status"
-        aria-live="polite"
-        style="
+  @if (showSummary && form.invalid) {
+  <div class="error-summary" role="status" aria-live="polite" style="
           background-color: #ffebee;
           color: #c62828;
           padding: 1rem;
           border-radius: 4px;
           margin-bottom: 2rem;
           border-left: 4px solid #c62828;
-        "
-      >
-        <p style="margin: 0">
-          Il form contiene errori. Controlla i campi evidenziati prima di procedere.
-        </p>
-      </div>
-    }
+        ">
+    <p style="margin: 0">
+      Il form contiene errori. Controlla i campi evidenziati prima di procedere.
+    </p>
+  </div>
+  }
 
-    <section
-      class="cart-summary"
-      style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem"
-    >
-      <h2 style="margin-top: 0; color: #333">Riepilogo carrello</h2>
+  <section class="cart-summary" style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem">
+    <h2 style="margin-top: 0; color: #333">Riepilogo carrello</h2>
 
-      @if (cartService.items().length === 0) {
-        <p style="color: #d32f2f; font-weight: bold">
-          Il carrello è vuoto. Aggiungi prodotti prima di procedere.
-        </p>
-      } @else {
-        <ul style="list-style: none; padding: 0; margin: 0 0 1rem 0">
-          @for (item of cartService.items(); track item.product.id) {
-            <li
-              style="
+    @if (cartService.items().length === 0) {
+    <p style="color: #d32f2f; font-weight: bold">
+      Il carrello è vuoto. Aggiungi prodotti prima di procedere.
+    </p>
+    } @else {
+    <ul style="list-style: none; padding: 0; margin: 0 0 1rem 0">
+      @for (item of cartService.items(); track item.product.id) {
+      <li style="
                 display: flex;
                 align-items: center;
                 padding: 10px 0;
                 border-bottom: 2px solid #eee;
                 gap: 12px;
-              "
-            >
-              <a
-                [routerLink]="['/products', item.product.id]"
-                style="color: #333; text-decoration: none; font-weight: 500; flex: 1;"
-              >
-                {{ item.product.title }}
-              </a>
+              ">
+        <a [routerLink]="['/products', item.product.id]"
+          style="color: #333; text-decoration: none; font-weight: 500; flex: 1;">
+          {{ item.product.title }}
+        </a>
 
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <button
-                  mat-icon-button
-                  type="button"
-                  (click)="decreaseQuantity(item)"
-                >
-                  <mat-icon>remove</mat-icon>
-                </button>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <button mat-icon-button type="button" (click)="decreaseQuantity(item)">
+            <mat-icon>remove</mat-icon>
+          </button>
 
-                <span style="min-width: 28px; text-align: center; font-weight: 500;">
-                  {{ item.quantity }}
-                </span>
+          <span style="min-width: 28px; text-align: center; font-weight: 500;">
+            {{ item.quantity }}
+          </span>
 
-                <button
-                  mat-icon-button
-                  type="button"
-                  (click)="increaseQuantity(item)"
-                >
-                  <mat-icon>add</mat-icon>
-                </button>
-              </div>
-
-              <strong style="width: 80px; text-align: right;">
-                {{ item.product.price * item.quantity | currency: 'EUR' }}
-              </strong>
-
-              <button
-                mat-icon-button
-                type="button"
-                style="color: rgb(103, 9, 9);"
-                (click)="removeFromCart(item)"
-              >
-                <mat-icon>delete_outline</mat-icon>
-              </button>
-            </li>
-          }
-        </ul>
-
-        <div style="text-align: right; font-size: 1.2rem; margin-top: 1rem">
-          Totale: <strong style="color: #3f51b5">{{ cartService.totalPrice() | currency: 'EUR' }}</strong>
+          <button mat-icon-button type="button" (click)="increaseQuantity(item)">
+            <mat-icon>add</mat-icon>
+          </button>
         </div>
+
+        <strong style="width: 80px; text-align: right;">
+          {{ item.product.price * item.quantity | currency: 'EUR' }}
+        </strong>
+
+        <button mat-icon-button type="button" style="color: rgb(103, 9, 9);" (click)="removeFromCart(item)">
+          <mat-icon>delete_outline</mat-icon>
+        </button>
+      </li>
       }
+    </ul>
+
+    <div style="text-align: right; font-size: 1.2rem; margin-top: 1rem">
+      Totale: <strong style="color: #3f51b5">{{ cartService.totalPrice() | currency: 'EUR' }}</strong>
+    </div>
+    }
+  </section>
+
+  @if (auth.isLoggedIn()) {
+  <form class="checkout-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <section formGroupName="customer" style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 2rem">
+      <h2 style="font-size: 1.2rem; color: #333; margin-bottom: 0">Dati cliente</h2>
+      <div style="display: flex; gap: 16px">
+        <mat-form-field appearance="outline" style="flex: 2">
+          <mat-label>Nome</mat-label>
+          <input matInput formControlName="firstName" placeholder="Il tuo nome" />
+          @if (hasError('customer.firstName', 'required')) {
+          <mat-error>Il nome è obbligatorio.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="flex: 2">
+          <mat-label>Cognome</mat-label>
+          <input matInput formControlName="lastName" placeholder="Il tuo cognome" />
+          @if (hasError('customer.lastName', 'required')) {
+          <mat-error>Il cognome è obbligatorio.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email" placeholder="esempio@email.com" />
+        @if (hasError('customer.email', 'required')) {
+        <mat-error>L'email è obbligatoria.</mat-error>
+        }
+        @if (hasError('customer.email', 'email')) {
+        <mat-error>Inserisci un indirizzo email valido.</mat-error>
+        }
+      </mat-form-field>
     </section>
 
-    @if (auth.isLoggedIn()) {
-      <form class="checkout-form" [formGroup]="form" (ngSubmit)="onSubmit()">
-        <section
-          formGroupName="customer"
-          style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 2rem"
-        >
-          <h2 style="font-size: 1.2rem; color: #333; margin-bottom: 0">Dati cliente</h2>
-          <div style="display: flex; gap: 16px">
-            <mat-form-field appearance="outline" style="flex: 2">
-              <mat-label>Nome</mat-label>
-              <input matInput formControlName="firstName" placeholder="Il tuo nome" />
-              @if (hasError('customer.firstName', 'required')) {
-                <mat-error>Il nome è obbligatorio.</mat-error>
-              }
-            </mat-form-field>
+    <section formGroupName="address" style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="font-size: 1.2rem; color: #333">Indirizzo di Spedizione</h2>
+      <mat-form-field appearance="outline">
+        <mat-label>Via e Numero Civico</mat-label>
+        <input matInput formControlName="street" placeholder="Es. Via Roma, 1" />
+      </mat-form-field>
+      <div style="display: flex; gap: 16px">
+        <mat-form-field appearance="outline" style="flex: 2">
+          <mat-label>Città</mat-label>
+          <input matInput formControlName="city" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" style="flex: 1">
+          <mat-label>CAP</mat-label>
+          <input matInput formControlName="zip" placeholder="00100" />
+          @if (hasError('address.zip', 'pattern')) {
+          <mat-error>Il CAP deve essere di 5 cifre.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </section>
 
-            <mat-form-field appearance="outline" style="flex: 2">
-              <mat-label>Cognome</mat-label>
-              <input matInput formControlName="lastName" placeholder="Il tuo cognome" />
-              @if (hasError('customer.lastName', 'required')) {
-                <mat-error>Il cognome è obbligatorio.</mat-error>
-              }
-            </mat-form-field>
-          </div>
-          <mat-form-field appearance="outline">
-            <mat-label>Email</mat-label>
-            <input matInput formControlName="email" type="email" placeholder="esempio@email.com" />
-            @if (hasError('customer.email', 'required')) {
-              <mat-error>L'email è obbligatoria.</mat-error>
-            }
-            @if (hasError('customer.email', 'email')) {
-              <mat-error>Inserisci un indirizzo email valido.</mat-error>
-            }
-          </mat-form-field>
-        </section>
-
-        <section formGroupName="address" style="display: flex; flex-direction: column; gap: 10px">
-          <h2 style="font-size: 1.2rem; color: #333">Indirizzo di Spedizione</h2>
-          <mat-form-field appearance="outline">
-            <mat-label>Via e Numero Civico</mat-label>
-            <input matInput formControlName="street" placeholder="Es. Via Roma, 1" />
-          </mat-form-field>
-          <div style="display: flex; gap: 16px">
-            <mat-form-field appearance="outline" style="flex: 2">
-              <mat-label>Città</mat-label>
-              <input matInput formControlName="city" />
-            </mat-form-field>
-            <mat-form-field appearance="outline" style="flex: 1">
-              <mat-label>CAP</mat-label>
-              <input matInput formControlName="zip" placeholder="00100" />
-              @if (hasError('address.zip', 'pattern')) {
-                <mat-error>Il CAP deve essere di 5 cifre.</mat-error>
-              }
-            </mat-form-field>
-          </div>
-        </section>
-
-        <div
-          style="
+    <div style="
             display: flex;
             flex-direction: column;
             gap: 20px;
             border-top: 1px solid #eee;
             padding-top: 1rem;
-          "
-        >
-          <mat-checkbox formControlName="privacy" color="primary">
-            Accetto i termini di servizio e la privacy policy
-          </mat-checkbox>
-          @if (hasError('privacy', 'required')) {
-            <mat-error style="font-size: 12px; margin-top: -15px">
-              Devi accettare per procedere.
-            </mat-error>
-          }
+          ">
+      <mat-checkbox formControlName="privacy" color="primary">
+        Accetto i termini di servizio e la privacy policy
+      </mat-checkbox>
+      @if (hasError('privacy', 'required')) {
+      <mat-error style="font-size: 12px; margin-top: -15px">
+        Devi accettare per procedere.
+      </mat-error>
+      }
 
-          <button
-            mat-raised-button
-            color="primary"
-            type="submit"
-            [disabled]="form.invalid || cartService.items().length === 0 || loading"
-            style="
+      <button mat-raised-button color="primary" type="submit"
+        [disabled]="form.invalid || cartService.items().length === 0 || loading" style="
               padding: 24px;
               font-size: 1.1rem;
               display: flex;
               justify-content: center;
               align-items: center;
               gap: 10px;
-            "
-          >
-            @if (loading) {
-              <mat-spinner diameter="24" color="accent"></mat-spinner>
-            } @else {
-              Conferma ordine
-            }
-          </button>
-        </div>
-      </form>
-    } @else {
-      <div
-        style="
+            ">
+        @if (loading) {
+        <mat-spinner diameter="24" color="accent"></mat-spinner>
+        } @else {
+        Conferma ordine
+        }
+      </button>
+    </div>
+  </form>
+  } @else {
+  <div style="
           background-color: #fff3cd;
           color: #856404;
           padding: 2rem;
@@ -242,21 +200,16 @@
           text-align: center;
           margin-top: 2rem;
           border: 1px solid #ffeeba;
-        "
-      >
-        <mat-icon style="font-size: 3rem; width: 3rem; height: 3rem; margin-bottom: 1rem;">lock</mat-icon>
-        <h2 style="margin-top: 0;">Accedi per continuare l'ordine</h2>
+        ">
+    <mat-icon style="font-size: 3rem; width: 3rem; height: 3rem; margin-bottom: 1rem;">lock</mat-icon>
+    <h2 style="margin-top: 0;">Accedi per continuare l'ordine</h2>
 
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="auth.login()"
-          style="padding: 24px; font-size: 1.1rem; margin-top: 1rem;"
-        >
-          <mat-icon>login</mat-icon>
-          Accedi o Registrati
-        </button>
-      </div>
-    }
+    <button mat-raised-button color="primary" (click)="auth.login()"
+      style="padding: 24px; font-size: 1.1rem; margin-top: 1rem;">
+      <mat-icon>login</mat-icon>
+      Accedi o Registrati
+    </button>
+  </div>
+  }
   }
 </div>

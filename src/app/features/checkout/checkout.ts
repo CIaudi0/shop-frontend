@@ -38,10 +38,10 @@ export class CheckoutComponent implements OnInit {
   private orderService = inject(OrderService);
   public auth = inject(AuthService);
 
-  showSummary      = false;
-  loading          = false;
-  orderSuccess     = false;
-  orderError       = false;
+  showSummary = false;
+  loading = false;
+  orderSuccess = false;
+  orderError = false;
   orderErrorMessage = 'Errore di comunicazione col server. L\'ordine non è andato a buon fine.';
 
 
@@ -133,8 +133,8 @@ export class CheckoutComponent implements OnInit {
       },
       error: (err) => {
         console.error('Errore salvataggio ordine:', err);
-        this.loading          = false;
-        this.orderError       = true;
+        this.loading = false;
+        this.orderError = true;
         this.orderErrorMessage = err.error?.errors ?? 'Errore di comunicazione col server. L\'ordine non è andato a buon fine.';
       }
     });

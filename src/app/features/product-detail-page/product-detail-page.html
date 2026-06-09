@@ -31,24 +31,19 @@
     <p>{{ product.description }}</p>
 
     @if (product.stock === 0) {
-      <p style="color:#d32f2f; font-weight:bold;">
-        &#9888; Prodotto esaurito — non disponibile per l'acquisto.
-      </p>
+    <p style="color:#d32f2f; font-weight:bold;">
+      &#9888; Prodotto esaurito — non disponibile per l'acquisto.
+    </p>
     } @else {
-      <p style="color:#388e3c; font-size:0.9rem;">
-        &#10003; Disponibile ({{ product.stock }} in magazzino)
-      </p>
+    <p style="color:#388e3c; font-size:0.9rem;">
+      &#10003; Disponibile ({{ product.stock }} in magazzino)
+    </p>
     }
   </mat-card-content>
 
   <mat-card-actions class="centered-actions">
-    <button
-      mat-raised-button
-      color="primary"
-      class="edit-button"
-      [disabled]="product.stock === 0"
-      (click)="addToCart(product)"
-    >
+    <button mat-raised-button color="primary" class="edit-button" [disabled]="product.stock === 0"
+      (click)="addToCart(product)">
       <mat-icon style="margin: auto; font-size: x-large; width: auto">add_shopping_cart</mat-icon>
     </button>
     @if (auth.isVendor()) {

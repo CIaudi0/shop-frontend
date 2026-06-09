@@ -21,8 +21,8 @@ export class HeaderComponent {
   @Input() showIcon: boolean = true;
 
   private router = inject(Router);
-  
-  public cartService = inject(CartService); 
+
+  public cartService = inject(CartService);
   public auth = inject(AuthService);
 
   goToCheckout() {

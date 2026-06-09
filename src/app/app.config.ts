@@ -12,8 +12,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(withInterceptors([httpErrorInterceptor, authInterceptor])),
-    // Blocca il rendering finché non sappiamo se l'utente ha un refresh token valido.
-    // Elimina il flash di stato "non loggato" all'avvio per utenti con sessione attiva.
     provideAppInitializer(async () => {
       await firstValueFrom(inject(AuthService).tryRefresh());
     }),

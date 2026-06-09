@@ -23,9 +23,9 @@ import { HttpStateCard } from '../../shared/http/http-state-card/http-state-card
 })
 export class AdminDashboardComponent {
   private adminService = inject(AdminService);
-  private snackBar     = inject(MatSnackBar);
+  private snackBar = inject(MatSnackBar);
 
-  public state      = signal<HttpState<AdminUser>>({ status: 'loading' });
+  public state = signal<HttpState<AdminUser>>({ status: 'loading' });
   public searchTerm = signal('');
   public roleFilter = signal('');
 
@@ -54,7 +54,7 @@ export class AdminDashboardComponent {
     this.state.set({ status: 'loading' });
     this.adminService.getUsers().subscribe({
       next: (data) => this.state.set({ status: 'success', data }),
-      error: ()     => this.state.set({ status: 'error', message: 'Errore nel caricamento degli utenti.' })
+      error: () => this.state.set({ status: 'error', message: 'Errore nel caricamento degli utenti.' })
     });
   }
 
