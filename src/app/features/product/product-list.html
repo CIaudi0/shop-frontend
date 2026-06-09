@@ -1,49 +1,70 @@
 <div class="product-list-container">
   <form class="filters" (submit)="$event.preventDefault()">
     <mat-form-field appearance="outline">
-      <mat-label>Cerca per titolo</mat-label>
-      <input 
-        matInput 
-        type="search" 
-        name="title" 
-        placeholder="Es. MacBook, Cuffie..." 
+      <mat-label>Cerca per titolo o descrizione</mat-label>
+      <input
+        matInput
+        type="search"
+        name="title"
+        placeholder="Es. MacBook, Cuffie..."
         [ngModel]="searchTitle()"
-        (ngModelChange)="searchTitle.set($event)" 
+        (ngModelChange)="onSearchChange($event)"
       />
       <mat-icon matPrefix>search</mat-icon>
     </mat-form-field>
   </form>
 
-  @if (filteredProducts() === undefined) {
-    <div style="display: flex; justify-content: center; padding: 50px;">
-      <mat-spinner diameter="50"></mat-spinner>
-    </div>
-  } @else {
-    <div class="product-grid">
-      @for (product of filteredProducts(); track product.id) {
-        <div class="product-card">
-          <img 
-            [src]="product.thumbnail || 'https://placehold.co/400x400/eeeeee/999999?text=Immagine+non+disponibile'" 
-            (error)="$event.target.src='https://placehold.co/400x400/eeeeee/999999?text=Immagine+non+disponibile'" 
-            [alt]="product.title" 
-            class="product-image" 
-          />
-          <h3>{{ product.title }}</h3>
-          <p class="price">{{ product.price }} €</p>
-          <p class="description">{{ product.description | slice: 0 : 60 }}...</p>
+  <app-http-state-card [state]="state()" (retry)="reload()">
+    @if (products().length === 0) {
+      <p class="empty-message">Nessun prodotto corrisponde alla tua ricerca.</p>
+    } @else {
+      <div class="product-grid">
+        @for (product of products(); track product.id) {
+          <div class="product-card">
+            @if (product.stock === 0) {
+              <span class="badge-esaurito">ESAURITO</span>
+            }
+            <img
+              [src]="product.thumbnail || 'https://placehold.co/400x400/eeeeee/999999?text=Immagine+non+disponibile'"
+              (error)="$event.target.src='https://placehold.co/400x400/eeeeee/999999?text=Immagine+non+disponibile'"
+              [alt]="product.title"
+              class="product-image"
+            />
+            <h3>{{ product.title }}</h3>
+            <p class="price">{{ product.price }} €</p>
+            <p class="description">{{ product.description | slice: 0 : 60 }}...</p>
 
-          <div class="card-actions">
-            <button type="button" [routerLink]="['/products', product.id]" mat-stroked-button color="accent">
-              Dettagli
-            </button>
-            <button mat-raised-button color="primary" style="flex: 1;" (click)="addToCart(product)">
-              <mat-icon style="margin:auto; font-size: x-large; width: auto;">add_shopping_cart</mat-icon>
-            </button>
+            <div class="card-actions">
+              <button type="button" [routerLink]="['/products', product.id]" mat-stroked-button color="accent">
+                Dettagli
+              </button>
+              <button
+                mat-raised-button
+                color="primary"
+                style="flex: 1;"
+                [disabled]="product.stock === 0"
+                (click)="addToCart(product)"
+              >
+                <mat-icon style="margin:auto; font-size: x-large; width: auto;">add_shopping_cart</mat-icon>
+              </button>
+            </div>
           </div>
+        }
+      </div>
+
+      @if (meta(); as m) {
+        <div class="pagination">
+          <button mat-stroked-button [disabled]="currentPage() <= 1" (click)="goToPage(currentPage() - 1)">
+            <mat-icon>chevron_left</mat-icon> Precedente
+          </button>
+          <span class="page-info">
+            Pagina {{ currentPage() }} di {{ m.total_pages }}&nbsp;&nbsp;({{ m.total }} prodotti)
+          </span>
+          <button mat-stroked-button [disabled]="currentPage() >= m.total_pages" (click)="goToPage(currentPage() + 1)">
+            Successiva <mat-icon>chevron_right</mat-icon>
+          </button>
         </div>
-      } @empty {
-        <p class="empty-message">Nessun prodotto corrisponde alla tua ricerca.</p>
       }
-    </div>
-  }
+    }
+  </app-http-state-card>
 </div>

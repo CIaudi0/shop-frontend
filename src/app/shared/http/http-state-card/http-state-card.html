@@ -1,18 +1,20 @@
 @switch (state?.status) {
   @case ('loading') {
-    <section class="http-state-loading">
+    <section style="display:flex; justify-content:center; padding:50px;">
       <mat-progress-spinner
         mode="indeterminate"
+        diameter="50"
         aria-label="Caricamento dati"
       ></mat-progress-spinner>
     </section>
   }
   @case ('error') {
-    <mat-card class="http-state-error" aria-live="polite">
-      <mat-card-title>Errore</mat-card-title>
+    <mat-card aria-live="polite"
+      style="background:#ffebee; border-left:4px solid #c62828; padding:1rem; margin:1rem 0;">
+      <mat-card-title style="color:#c62828; font-size:1rem;">Errore di caricamento</mat-card-title>
       <mat-card-content>
-        <p>{{ state?.status }}</p>
-        <button mat-button (click)="onRetry()">Riprova</button>
+        <p style="margin:0.5rem 0;">{{ $any(state).message }}</p>
+        <button mat-stroked-button color="warn" (click)="onRetry()">Riprova</button>
       </mat-card-content>
     </mat-card>
   }

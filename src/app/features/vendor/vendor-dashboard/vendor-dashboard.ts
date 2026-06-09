@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router'; 
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,19 +19,20 @@ import { VendorService } from '../../../core/services/vendor';
   templateUrl: './vendor-dashboard.html'
 })
 export class VendorDashboardComponent implements OnInit {
-  private fb = inject(FormBuilder);
+  private fb            = inject(FormBuilder);
   private vendorService = inject(VendorService);
-  private snackBar = inject(MatSnackBar);
-  private route = inject(ActivatedRoute);
-  private location = inject(Location);
+  private snackBar      = inject(MatSnackBar);
+  private route         = inject(ActivatedRoute);
+  private location      = inject(Location);
 
   isEditMode = false;
   productId: string | null = null;
 
   productForm = this.fb.group({
-    title: ['', Validators.required],
-    price: [null as number | null, [Validators.required, Validators.min(0.01)]],
-    thumbnail: ['', Validators.required],
+    title:       ['', Validators.required],
+    price:       [null as number | null, [Validators.required, Validators.min(0.01)]],
+    stock:       [0, [Validators.required, Validators.min(0)]],
+    thumbnail:   ['', Validators.required],
     description: ['', Validators.required]
   });
 
@@ -41,9 +42,7 @@ export class VendorDashboardComponent implements OnInit {
     if (this.productId) {
       this.isEditMode = true;
       this.vendorService.getProduct(this.productId).subscribe({
-        next: (product) => {
-          this.productForm.patchValue(product);
-        },
+        next: (product) => this.productForm.patchValue(product),
         error: () => this.snackBar.open('Errore nel caricamento del prodotto', 'Chiudi', { duration: 2000 })
       });
     }
@@ -58,13 +57,13 @@ export class VendorDashboardComponent implements OnInit {
           this.snackBar.open('Modifiche salvate con successo!', 'Chiudi', { duration: 4000 });
           this.goBack();
         },
-        error: () => this.snackBar.open("Errore durante il salvataggio.", 'Chiudi', { duration: 2000 })
+        error: () => this.snackBar.open('Errore durante il salvataggio.', 'Chiudi', { duration: 2000 })
       });
     } else {
       this.vendorService.createProduct(this.productForm.value).subscribe({
         next: () => {
           this.snackBar.open('Prodotto aggiunto con successo!', 'Chiudi', { duration: 4000 });
-          this.productForm.reset();
+          this.productForm.reset({ stock: 0 });
         },
         error: () => this.snackBar.open("Errore durante l'inserimento.", 'Chiudi', { duration: 2000 })
       });

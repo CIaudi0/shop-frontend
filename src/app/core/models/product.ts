@@ -5,6 +5,7 @@ export interface Product {
   price: number;
   originalPrice: number;
   sale: boolean;
+  stock: number;
   thumbnail?: string;
   tags?: string[];
   createdAt: string;

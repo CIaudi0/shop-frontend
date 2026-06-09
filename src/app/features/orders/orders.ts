@@ -1,37 +1,34 @@
-import { Component, inject, OnInit, signal, NgZone } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { OrderService } from '../../core/services/order'; 
+import { OrderService } from '../../core/services/order';
+import { HttpState } from '../../shared/http/http-state';
+import { HttpStateCard } from '../../shared/http/http-state-card/http-state-card';
 
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatProgressSpinnerModule, DatePipe, CurrencyPipe],
+  imports: [CommonModule, MatCardModule, DatePipe, CurrencyPipe, HttpStateCard],
   templateUrl: './orders.html'
 })
-export class OrdersComponent implements OnInit {
+export class OrdersComponent {
   private orderService = inject(OrderService);
-  private zone = inject(NgZone); 
 
-  orders = signal<any[]>([]);
-  loading = signal<boolean>(true);
+  public state  = signal<HttpState<any>>({ status: 'loading' });
+  public orders = computed<any[]>(() => {
+    const s = this.state();
+    return s.status === 'success' ? s.data : [];
+  });
 
-  ngOnInit(): void {
+  constructor() {
+    this.load();
+  }
+
+  load(): void {
+    this.state.set({ status: 'loading' });
     this.orderService.getOrders().subscribe({
-      next: (data) => {
-        console.log("Dati ricevuti da Rails:", data);
-        this.zone.run(() => {
-          this.orders.set(data);
-          this.loading.set(false);
-        });
-      },
-      error: (err) => {
-        this.zone.run(() => {
-          console.error("Errore nel caricamento ordini", err);
-          this.loading.set(false);
-        });
-      }
+      next: (data) => this.state.set({ status: 'success', data }),
+      error: ()     => this.state.set({ status: 'error', message: 'Errore nel caricamento degli ordini.' })
     });
   }
 }

@@ -3,15 +3,28 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Product } from '../models/product';
 
-@Injectable({
-  providedIn: 'root',
-})
+export interface ProductsMeta {
+  total: number;
+  page: number;
+  per_page: number;
+  total_pages: number;
+}
+
+export interface ProductsResponse {
+  products: Product[];
+  meta: ProductsMeta;
+}
+
+@Injectable({ providedIn: 'root' })
 export class ProductService {
   private http = inject(HttpClient);
 
-  getProducts(query?: string): Observable<Product[]> {
-    const params = query ? new HttpParams().set('q', query) : undefined;
-    return this.http.get<Product[]>('/products', { params });
+  getProducts(query?: string, page: number = 1, perPage: number = 8): Observable<ProductsResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('per_page', perPage.toString());
+    if (query) params = params.set('q', query);
+    return this.http.get<ProductsResponse>('/products', { params });
   }
 
   getById(id: string): Observable<Product> {

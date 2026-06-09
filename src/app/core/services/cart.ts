@@ -11,23 +11,22 @@ export interface CartItem {
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
-
-  private http = inject(HttpClient);
-  private auth = inject(AuthService);
+  private http      = inject(HttpClient);
+  private auth      = inject(AuthService);
+  private snackBar  = inject(MatSnackBar);
   private readonly STORAGE_KEY = 'shop_cart_data';
 
   private _items = signal<CartItem[]>([]);
   public readonly items = this._items.asReadonly();
 
   private loadCartRequestId = 0;
-  private snackBar = inject(MatSnackBar);
 
   public readonly totalCount = computed(() =>
-    this._items().reduce((total, item) => total + item.quantity, 0)
+    this._items().reduce((sum, item) => sum + item.quantity, 0)
   );
 
   public readonly totalPrice = computed(() =>
-    this._items().reduce((total, item) => total + (item.product.price * item.quantity), 0)
+    this._items().reduce((sum, item) => sum + item.product.price * item.quantity, 0)
   );
 
   constructor() {
@@ -42,14 +41,13 @@ export class CartService {
 
     const requestId = ++this.loadCartRequestId;
     this.http.get<CartItem[]>('/cart').subscribe({
-      next: (itemsResponse) => {
-        if (requestId !== this.loadCartRequestId) return;
-        this._items.set(itemsResponse);
+      next: (items) => {
+        if (requestId !== this.loadCartRequestId) return; // risposta stale, scarta
+        this._items.set(items);
       },
       error: () => {
         this.snackBar.open('Errore di connessione al carrello. Riprova più tardi.', 'Chiudi', {
-          duration: 3000,
-          panelClass: ['error-snackbar']
+          duration: 3000
         });
       }
     });
@@ -59,14 +57,17 @@ export class CartService {
     if (!this.auth.isLoggedIn()) {
       this._items.update(currentItems => {
         const existing = currentItems.find(i => i.product.id === product.id);
-        let updated: CartItem[];
-        if (existing) {
-          updated = currentItems.map(i =>
-            i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
-          );
-        } else {
-          updated = [...currentItems, { product, quantity: 1 }];
+        const currentQty = existing?.quantity ?? 0;
+
+        if (product.stock > 0 && currentQty >= product.stock) {
+          this.snackBar.open(`Stock esaurito (disponibili: ${product.stock})`, 'Chiudi', { duration: 2000 });
+          return currentItems;
         }
+
+        const updated = existing
+          ? currentItems.map(i => i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i)
+          : [...currentItems, { product, quantity: 1 }];
+
         this.saveToStorage(updated);
         return updated;
       });
@@ -75,7 +76,13 @@ export class CartService {
 
     this.http.post(`/cart/add/${product.id}`, {}).subscribe({
       next: () => this.loadCart(),
-      error: () => this.loadCart()
+      error: (err) => {
+        // Il backend risponde 422 se lo stock è esaurito
+        if (err.status === 422) {
+          this.snackBar.open(err.error?.errors ?? 'Impossibile aggiungere al carrello', 'Chiudi', { duration: 2500 });
+        }
+        this.loadCart();
+      }
     });
   }
 
@@ -84,14 +91,9 @@ export class CartService {
       this._items.update(currentItems => {
         const existing = currentItems.find(i => i.product.id === product.id);
         if (!existing) return currentItems;
-        let updated: CartItem[];
-        if (existing.quantity > 1) {
-          updated = currentItems.map(i =>
-            i.product.id === product.id ? { ...i, quantity: i.quantity - 1 } : i
-          );
-        } else {
-          updated = currentItems.filter(i => i.product.id !== product.id);
-        }
+        const updated = existing.quantity > 1
+          ? currentItems.map(i => i.product.id === product.id ? { ...i, quantity: i.quantity - 1 } : i)
+          : currentItems.filter(i => i.product.id !== product.id);
         this.saveToStorage(updated);
         return updated;
       });
@@ -112,14 +114,9 @@ export class CartService {
   updateQuantity(productId: number, quantity: number): void {
     if (!this.auth.isLoggedIn()) {
       this._items.update(currentItems => {
-        let updated: CartItem[];
-        if (quantity <= 0) {
-          updated = currentItems.filter(i => i.product.id !== productId);
-        } else {
-          updated = currentItems.map(i =>
-            i.product.id === productId ? { ...i, quantity } : i
-          );
-        }
+        const updated = quantity <= 0
+          ? currentItems.filter(i => i.product.id !== productId)
+          : currentItems.map(i => i.product.id === productId ? { ...i, quantity } : i);
         this.saveToStorage(updated);
         return updated;
       });
@@ -134,14 +131,17 @@ export class CartService {
 
   syncLocalCartToServer(): void {
     const localItems = this.loadFromStorage();
+
     if (localItems.length === 0 || !this.auth.isLoggedIn()) {
       this.loadCart();
       return;
     }
 
+    this.loadCartRequestId++;
+
     const payload = localItems.map(item => ({
       product_id: item.product.id,
-      quantity: item.quantity
+      quantity:   item.quantity
     }));
 
     this.http.post('/cart/sync', { items: payload }).subscribe({
@@ -149,7 +149,7 @@ export class CartService {
         sessionStorage.removeItem(this.STORAGE_KEY);
         this.loadCart();
       },
-      error: (err) => console.error("Errore durante la sincronizzazione", err)
+      error: (err) => console.error('Errore durante la sincronizzazione', err)
     });
   }
 

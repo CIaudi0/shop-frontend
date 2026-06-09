@@ -26,6 +26,7 @@
 }
 
 .product-card {
+  position: relative;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 16px;
@@ -33,9 +34,7 @@
   flex-direction: column;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   background-color: white;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
 
   &:hover {
     transform: translateY(-4px);
@@ -46,9 +45,8 @@
     width: 100%;
     height: 200px;
     object-fit: cover;
-    border-radius: 4px;
-    margin-bottom: 16px;
     border-radius: 8px;
+    margin-bottom: 16px;
   }
 
   h3 {
@@ -83,10 +81,35 @@
   }
 }
 
+.badge-esaurito {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #d32f2f;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 2rem;
+
+  .page-info {
+    font-size: 0.9rem;
+    color: #555;
+  }
+}
+
 .empty-message {
   text-align: center;
   color: #666;
   font-size: 1.1rem;
   padding: 40px;
-  grid-column: 1 / -1;
 }
